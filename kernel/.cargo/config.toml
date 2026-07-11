@@ -1,4 +1,3 @@
-
 [build]
 # points to file in project root
 target = "x86-vb_os-bare_metal.json"
