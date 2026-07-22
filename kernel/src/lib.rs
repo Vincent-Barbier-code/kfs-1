@@ -17,6 +17,16 @@ fn panic(_info: &PanicInfo) -> ! {
 // -> kernel_main
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main() -> ! {
-    vga::print_hello_world("Hello les guys !");
+    vga::WRITER.lock().clear_screen();
+    for row in 1..28  {
+        if row % 2 == 0 {
+            vga::WRITER.lock().set_color(vga::Color::Red,  vga::Color::Yellow);
+        }
+        else {
+            vga::WRITER.lock().set_color(vga::Color::Cyan,  vga::Color::DarkGray);
+        }
+        println!("Screen Column n-{}", row);
+    }
+    print!("Hello {}", 42);
     loop {}
 }

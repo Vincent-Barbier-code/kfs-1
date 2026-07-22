@@ -1,0 +1,168 @@
+# kfs-1
+
+> A minimal x86 kernel written in Rust (`#![no_std]`)
+
+## 📖 Introduction
+
+**kfs-1** est un noyau expérimental écrit en **Rust** pour l'architecture **x86 (32 bits)**. Son objectif est d'explorer le développement de systèmes d'exploitation en partant de zéro, depuis le chargement du noyau par **GRUB** jusqu'à l'interaction directe avec le matériel.
+
+Le projet est développé sans la bibliothèque standard de Rust (`#![no_std]`) et sans système d'exploitation sous-jacent. Chaque composant est implémenté progressivement afin de comprendre les mécanismes fondamentaux d'un kernel :
+
+- processus de démarrage (Bootloader → Kernel)
+- affichage via le buffer VGA
+- gestion de la mémoire
+- interruptions
+- pilotes matériels
+- synchronisation
+- abstractions bas niveau
+
+Ce dépôt sert à la fois de projet d'apprentissage et de documentation de l'évolution du noyau.
+
+---
+
+# 🚀 État actuel
+
+- ✅ Boot via GRUB (Multiboot)
+- ✅ Kernel Rust (`#![no_std]`)
+- ✅ Affichage dans le buffer VGA
+- ✅ Implémentation d'un `Writer`
+- ✅ Macros `print!` et `println!`
+- 🔜 Gestion du curseur
+- 🔜 Interruptions
+- 🔜 Gestion mémoire
+
+---
+
+# 🖥️ Architecture de l'affichage
+
+L'affichage repose sur un `Writer` global protégé par un `Mutex`. Les macros `print!` et `println!` génèrent un objet `fmt::Arguments` qui est ensuite écrit dans le buffer VGA (`0xB8000`).
+
+```mermaid
+flowchart LR
+
+subgraph Application
+    A["Votre code<br/>println!(&quot;Hello&quot;)"]
+end
+
+subgraph Macros
+    B["println!"]
+    C["Ajoute '\n'"]
+    D["print!"]
+end
+
+subgraph Formatting
+    E["format_args!"]
+    F["fmt::Arguments"]
+end
+
+subgraph Writer
+    G["_print()"]
+    H["WRITER.lock()"]
+    I["write_fmt()"]
+    J["write_str()"]
+end
+
+subgraph Hardware
+    K["VGA Buffer<br/>0xB8000"]
+    L["Écran"]
+end
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+H --> I
+I --> J
+J --> K
+K --> L
+```
+
+---
+
+# 🔍 Fonctionnement de `println!`
+
+L'appel à `println!` traverse plusieurs couches avant que le texte ne soit affiché à l'écran.
+
+```mermaid
+flowchart LR
+
+A["println!(&quot;x = {}&quot;, x)"]
+
+A --> B["Expansion de macro"]
+
+B --> C["print!(&quot;{}\n&quot;, format_args!(...))"]
+
+C --> D["format_args!"]
+
+D --> E["fmt::Arguments"]
+
+E --> F["_print(args)"]
+
+F --> G["write_fmt(args)"]
+
+G --> H["write_str()"]
+
+H --> I["0xB8000"]
+
+I --> J["Texte affiché"]
+```
+
+# Writeur global
+
+Le `Writer` est un objet global protégé par un `Mutex`. Il est responsable de l'écriture dans le buffer VGA.
+
+```mermaid
+flowchart LR
+
+A["Character"]
+
+A --> B["ColorCode"]
+
+B --> C["ScreenChar"]
+
+C --> D["Writer"]
+
+D --> E["Buffer[25][80]"]
+
+E --> F["0xB8000"]
+```
+
+
+---
+
+# 📚 Technologies utilisées
+
+- Rust (Nightly)
+- GRUB (Multiboot)
+- NASM
+- QEMU
+- VGA Text Buffer
+- x86 (32 bits)
+
+---
+
+# 📂 Structure du projet
+
+```text
+kfs-1/
+├── boot/
+│   └── boot.asm                    # Point d'entrée du noyau (Multiboot + ASM)
+├── iso/
+│   └── boot/
+│       └── grub/
+│           └── grub.cfg            # Configuration GRUB
+├── kernel/
+│   ├── .cargo/
+│   │   └── config.toml             # Configuration Cargo
+│   ├── src/
+│   │   ├── lib.rs                  # Point d'entrée du noyau Rust
+│   │   └── vga.rs                  # Pilote VGA (Writer, print!, println!)
+│   ├── Cargo.toml                  # Configuration du crate
+│   └── x86-Shadow_os-bare_metal.json   # Spécification de la cible x86
+├── linker.ld                       # Script de l'éditeur de liens
+├── Makefile                        # Compilation, création de l'ISO et lancement
+└── README.md
+```

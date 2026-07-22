@@ -15,7 +15,7 @@ kernel.bin: boot/boot.o kernel
 	ld -m elf_i386 \
 		-T linker.ld \
 		boot/boot.o \
-		kernel/target/x86-vb_os-bare_metal/debug/libkfs.a \
+		kernel/target/x86-Shadow_os-bare_metal/debug/libkfs.a \
 		-o kernel.bin
 
 run: all

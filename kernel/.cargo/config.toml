@@ -1,8 +1,8 @@
 [build]
 # points to file in project root
-target = "x86-vb_os-bare_metal.json"
+target = "x86-Shadow_os-bare_metal.json"
 
-[target.x86-vb_os-bare_metal]
+[target.x86-Shadow_os-bare_metal]
 rustflags = [
     "-C", "link-arg=-T../linker.ld",
     "-C", "link-arg=../boot/boot.o",
