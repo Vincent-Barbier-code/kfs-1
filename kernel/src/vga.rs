@@ -6,8 +6,8 @@ use spin::Mutex;
 // Global Writer
 lazy_static! {
         pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
-        row_position: 0,
-        column_position: 0,
+        row: 0,
+        column: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         // 0xb8000 Memoire VGA
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
@@ -44,7 +44,7 @@ struct ColorCode {
 
 impl ColorCode {
     //this is the method new for ColorCode
-    fn new(foreground: Color, background: Color) -> ColorCode {
+    const fn new(foreground: Color, background: Color) -> ColorCode {
         ColorCode{value: (background as u8) << 4 | (foreground as u8)}
     }
 }
@@ -67,30 +67,41 @@ struct Buffer {
 }
 
 pub struct Writer {
-    row_position: usize,
-    column_position: usize,
+    row: usize,
+    column: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
 }
 
 impl Writer {
+
+    pub const fn new() -> Self {
+        Self {
+            row: 0,
+            column: 0,
+            color_code: ColorCode::new(Color::White, Color::Black),
+            // 0xb8000 Memoire VGA
+            buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+        }
+    }
+
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
             byte => {
-                if self.column_position >= BUFFER_WIDTH {
+                if self.column >= BUFFER_WIDTH {
                     self.new_line();
                 }
 
-                let row = self.row_position;
-                let col = self.column_position;
+                let row = self.row;
+                let col = self.column;
 
                 let color_code = self.color_code;
                 self.buffer.chars[row][col] = ScreenChar {
                     ascii_character: byte,
                     color_code,
                 };
-                self.column_position += 1;
+                self.column += 1;
             }
         }
     }
@@ -107,8 +118,8 @@ impl Writer {
     }
     
     fn new_line(&mut self) {
-        if self.row_position < BUFFER_HEIGHT - 1 {
-            self.row_position +=1;
+        if self.row < BUFFER_HEIGHT - 1 {
+            self.row +=1;
         }
         else {
             for row in 1..BUFFER_HEIGHT {
@@ -119,7 +130,7 @@ impl Writer {
             }
             self.clear_row(BUFFER_HEIGHT - 1);
         }
-        self.column_position = 0;
+        self.column = 0;
     }
 
     fn clear_row(&mut self, row: usize) {
@@ -137,8 +148,8 @@ impl Writer {
             self.clear_row(row);
         }
 
-        self.row_position = 0;
-        self.column_position = 0;
+        self.row = 0;
+        self.column = 0;
     }
 
     pub fn set_color(&mut self, foreground: Color, background: Color) {

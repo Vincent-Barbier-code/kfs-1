@@ -20,13 +20,14 @@ pub extern "C" fn kernel_main() -> ! {
     vga::WRITER.lock().clear_screen();
     for row in 1..28  {
         if row % 2 == 0 {
-            vga::WRITER.lock().set_color(vga::Color::Red,  vga::Color::Yellow);
+            vga::WRITER.lock().set_color(vga::Color::Red,  vga::Color::Black);
         }
         else {
-            vga::WRITER.lock().set_color(vga::Color::Cyan,  vga::Color::DarkGray);
+            vga::WRITER.lock().set_color(vga::Color::Cyan,  vga::Color::Black);
         }
         println!("Screen Column n-{}", row);
     }
+    // print information / debug
     print!("Hello {}", 42);
     loop {}
 }

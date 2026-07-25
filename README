@@ -149,20 +149,20 @@ E --> F["0xB8000"]
 ```text
 kfs-1/
 ├── boot/
-│   └── boot.asm                    # Point d'entrée du noyau (Multiboot + ASM)
+│   └── boot.asm                        # Point d'entrée du noyau (Multiboot + ASM)
 ├── iso/
 │   └── boot/
 │       └── grub/
-│           └── grub.cfg            # Configuration GRUB
+│           └── grub.cfg                # Configuration GRUB
 ├── kernel/
 │   ├── .cargo/
-│   │   └── config.toml             # Configuration Cargo
+│   │   └── config.toml                 # Configuration Cargo
 │   ├── src/
-│   │   ├── lib.rs                  # Point d'entrée du noyau Rust
-│   │   └── vga.rs                  # Pilote VGA (Writer, print!, println!)
-│   ├── Cargo.toml                  # Configuration du crate
+│   │   ├── lib.rs                      # Point d'entrée du noyau Rust
+│   │   └── vga.rs                      # Pilote VGA (Writer, print!, println!)
+│   ├── Cargo.toml                      # Configuration du crate
 │   └── x86-Shadow_os-bare_metal.json   # Spécification de la cible x86
-├── linker.ld                       # Script de l'éditeur de liens
-├── Makefile                        # Compilation, création de l'ISO et lancement
+├── linker.ld                           # Script de l'éditeur de liens
+├── Makefile                            # Compilation, création de l'ISO et lancement
 └── README.md
 ```
